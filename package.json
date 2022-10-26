@@ -12,7 +12,8 @@
   "scripts": {
     "build": "rollup -c",
     "lint": "eslint .",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "postinstall": "rollup -c"
   },
   "author": "Grégoire Hertault",
   "license": "MIT",
