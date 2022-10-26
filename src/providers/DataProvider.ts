@@ -1,4 +1,6 @@
 import { API, GraphQLResult, GRAPHQL_AUTH_MODE } from "@aws-amplify/api";
+import { Schema } from "@aws-amplify/datastore";
+
 import {
   CreateParams,
   CreateResult,
@@ -34,6 +36,7 @@ export interface DataProviderOptions {
   storageBucket?: string;
   storageRegion?: string;
   enableAdminQueries?: boolean;
+  schema?: Schema;
 }
 
 const defaultOptions = {
@@ -48,6 +51,8 @@ export class DataProvider {
   public authMode: GRAPHQL_AUTH_MODE;
   public enableAdminQueries: boolean;
 
+  public schema: Schema | undefined;
+
   static storageBucket?: string;
   static storageRegion?: string;
 
@@ -58,6 +63,7 @@ export class DataProvider {
     this.authMode = options?.authMode || defaultOptions.authMode;
     this.enableAdminQueries =
       options?.enableAdminQueries || defaultOptions.enableAdminQueries;
+    this.schema = options?.schema;
 
     DataProvider.storageBucket = options?.storageBucket;
     DataProvider.storageRegion = options?.storageRegion;
@@ -349,15 +355,23 @@ export class DataProvider {
 
   public getQueryName(operation: string, resource: string): string {
     const pluralOperations = ["list"];
-    if (pluralOperations.includes(operation)) {
+    if (this.schema === undefined) {
+      if (pluralOperations.includes(operation)) {
+        return `${operation}${
+          resource.charAt(0).toUpperCase() + resource.slice(1)
+        }`;
+      }
+      // else singular operations ["create", "delete", "get", "update"]
       return `${operation}${
-        resource.charAt(0).toUpperCase() + resource.slice(1)
+        resource.charAt(0).toUpperCase() + resource.slice(1, -1)
       }`;
+    } else {
+      if (pluralOperations.includes(operation)) {
+        return `${operation}${this.schema.models[resource].pluralName}`;
+      } else {
+        return `${operation}${this.schema.models[resource].name}`;
+      }
     }
-    // else singular operations ["create", "delete", "get", "update"]
-    return `${operation}${
-      resource.charAt(0).toUpperCase() + resource.slice(1, -1)
-    }`;
   }
 
   public getQueryNameMany(
