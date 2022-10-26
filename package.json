@@ -13,7 +13,7 @@
     "build": "rollup -c",
     "lint": "eslint .",
     "test": "jest --coverage",
-    "postinstall": "rollup -c"
+    "prepare": "npm run build"
   },
   "author": "Grégoire Hertault",
   "license": "MIT",
