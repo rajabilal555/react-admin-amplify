@@ -366,10 +366,23 @@ export class DataProvider {
         resource.charAt(0).toUpperCase() + resource.slice(1, -1)
       }`;
     } else {
-      if (pluralOperations.includes(operation)) {
-        return `${operation}${this.schema.models[resource].pluralName}`;
-      } else {
-        return `${operation}${this.schema.models[resource].name}`;
+      try {
+        if (pluralOperations.includes(operation)) {
+          return `${operation}${this.schema.models[resource].pluralName}`;
+        } else {
+          return `${operation}${this.schema.models[resource].name}`;
+        }
+      } catch (error) {
+        // If there was an error (like schema model not found for the Query Name...) return to default way.
+        if (pluralOperations.includes(operation)) {
+          return `${operation}${
+            resource.charAt(0).toUpperCase() + resource.slice(1)
+          }`;
+        }
+        // else singular operations ["create", "delete", "get", "update"]
+        return `${operation}${
+          resource.charAt(0).toUpperCase() + resource.slice(1, -1)
+        }`;
       }
     }
   }
